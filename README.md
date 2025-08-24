@@ -32,6 +32,7 @@ Creators issue NFTs to grow their communities. Members mint NFTs to prove their 
   - [Installation](#installation)
   - [Running the App](#running-the-app)
 - [Smart Contracts](#smart-contracts)
+- [Next steps](#next-steps)
 
 ## Project Overview
 
@@ -123,3 +124,18 @@ export const CONTRACT_ADDRESSES = {
 - **PresenceEventFactory**: Deploys new event contracts
 - **Community Contract**: Manages members, metadata, NFTs and Community
 - **Event Contract**: Manages members, metadata, NFTs and Event
+
+## Next Steps
+1. Integration with Google forms: Allows Creators to share a google form with users which collects wallet addresses of users allowing creators to directly extract and allow all wallet addresses to mint NFTs.
+2. Improving AI Image model: Improving the AI iamge generation feature (Integrate APIs of better models or use a self-hosted model).
+3. Improving Community and Event contract: Gas Optimizations, better features like options for "Anyone can join" or "Invite only" for community and events and Start and End Dates for events.
+4. Dynamic NFTs: Allow users to update their NFTs' Metadata based on their achievements in community or event.
+5. Improving UI/UX: Creators shouldn't worry about things they don't need to worry about.
+6. Community and Event Discovery Page: Provide a page for users to discover new communities and events.
+
+### Possibilities
+1. File sharing: Distribute a file (even AI Models) and allow only the users having authorized NFTs to access it.
+2. Pay-to-mint: Users pay to mint an NFT of a community or event. Can be used to buy NFTs as tickets to an event.
+
+### The Main Step
+To help creators grow their communities. To help users prove their presence.
