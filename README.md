@@ -12,8 +12,8 @@ Creators should spend time doing what suits them the best and let the platform h
 Video demo: https://youtu.be/TeyJThHBiNU   
 Team members: Shiv Shakti Rai   
 Contracts Deployed on Shape Testnet:   
-  presenceEventFactory: "0x00CB402321a902CbA782f591ACb557c1d121669f",   
-  presenceCommunityFactory: "0x464Cbc87D461B53Adb626184C3BDCfa605c8eB26"   
+  PresenceEvent: 0x00CB402321a902CbA782f591ACb557c1d121669f    
+  PresenceCommunity: 0x464Cbc87D461B53Adb626184C3BDCfa605c8eB26   
 
 ## The platform
 
