@@ -182,6 +182,51 @@ export const AIProvider: React.FC<AIProviderProps> = ({ children }) => {
     return enhancedContracts
   }
 
+  // Improved JSON extraction function
+  const extractJSONFromResponse = (response: string): string[] => {
+    try {
+      // Remove any markdown formatting
+      let cleanResponse = response.replace(/```json\s*|\s*```/g, '').trim()
+      
+      // Try to find JSON array in the response
+      const jsonPatterns = [
+        /\[[\s\S]*?\]/,           // Standard array pattern
+        /(\[[\s\S]*?\])/g,       // Multiple arrays
+        /"[^"]*"(?:\s*,\s*"[^"]*")*/g  // Simple string array pattern
+      ]
+
+      for (const pattern of jsonPatterns) {
+        const match = cleanResponse.match(pattern)
+        if (match) {
+          try {
+            const parsed = JSON.parse(match[0])
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              return parsed.filter(item => typeof item === 'string')
+            }
+          } catch (e) {
+            continue
+          }
+        }
+      }
+
+      // If JSON parsing fails, try to extract suggestions using regex
+      const suggestionLines = cleanResponse.split('\n').filter(line => 
+        line.includes('[COMMUNITY]') || line.includes('[EVENT]') ||
+        line.match(/^\d+\.\s*\*\*.*\*\*/) || // Numbered list with bold
+        line.match(/^[-•*]\s*.*/) // Bullet points
+      )
+
+      if (suggestionLines.length > 0) {
+        return suggestionLines.map(line => line.replace(/^\d+\.\s*|-\s*|•\s*|\*\s*/, '').trim())
+      }
+
+      return []
+    } catch (error) {
+      console.warn("Failed to extract JSON from response:", error)
+      return []
+    }
+  }
+
   // Call Gemini API for suggestions
   const callGeminiAPI = async (prompt: string): Promise<string> => {
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
@@ -202,9 +247,9 @@ export const AIProvider: React.FC<AIProviderProps> = ({ children }) => {
           }]
         }],
         generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
+          temperature: 0.3,  // Reduced for more consistent JSON output
+          topK: 20,          // Reduced for more focused responses
+          topP: 0.8,         // Reduced for more consistent output
           maxOutputTokens: 1024,
         }
       })
@@ -250,152 +295,160 @@ export const AIProvider: React.FC<AIProviderProps> = ({ children }) => {
     }
   }
 
-  // Alternative implementation using Hugging Face (requires free API key)
-  const generateImageHuggingFace = async (prompt: string): Promise<string> => {
-    try {
-      const hfApiKey = process.env.NEXT_PUBLIC_HUGGING_FACE_API_KEY
-      
-      if (!hfApiKey) {
-        throw new Error("Hugging Face API key not found")
-      }
+const getSuggestions = async (
+  userNFTs: NFT[], 
+  allCommunities: CreatorContract[], 
+  allEvents: CreatorContract[]
+): Promise<string[]> => {
+  try {
+    setIsLoadingSuggestions(true)
+    setError(null)
 
-      const response = await fetch(
-        "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",
-        {
-          headers: {
-            Authorization: `Bearer ${hfApiKey}`,
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-          body: JSON.stringify({
-            inputs: prompt,
-            parameters: {
-              negative_prompt: "blurry, bad quality, distorted",
-              num_inference_steps: 20,
-              guidance_scale: 7.5,
-              width: 512,
-              height: 512
-            }
-          }),
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-      }
-
-      const blob = await response.blob()
-      const imageUrl = URL.createObjectURL(blob)
-      return imageUrl
-    } catch (err: any) {
-      console.error("Hugging Face API failed:", err)
-      setError(err.message || "Failed to generate image")
-      throw err
+    // If no communities or events available, return empty array
+    if (allCommunities.length === 0 && allEvents.length === 0) {
+      return []
     }
-  }
 
-  const getSuggestions = async (
-    userNFTs: NFT[], 
-    allCommunities: CreatorContract[], 
-    allEvents: CreatorContract[]
-  ): Promise<string[]> => {
-    try {
-      setIsLoadingSuggestions(true)
-      setError(null)
+    // Identify communities/events user is already part of
+    const userContractAddresses = new Set(userNFTs.map(nft => nft.contractAddress.toLowerCase()))
+    const userCommunities = allCommunities.filter(c => userContractAddresses.has(c.address.toLowerCase()))
+    const userEvents = allEvents.filter(e => userContractAddresses.has(e.address.toLowerCase()))
+    const availableCommunities = allCommunities.filter(c => !userContractAddresses.has(c.address.toLowerCase()))
+    const availableEvents = allEvents.filter(e => !userContractAddresses.has(e.address.toLowerCase()))
 
-      // Fetch enhanced data for all inputs
-      const [enhancedUserNFTs, enhancedCommunities, enhancedEvents] = await Promise.all([
-        fetchEnhancedNFTData(userNFTs),
-        fetchEnhancedContractData(allCommunities),
-        fetchEnhancedContractData(allEvents)
-      ])
+    // Fetch enhanced data for all inputs
+    const [enhancedUserNFTs, enhancedAllCommunities, enhancedAllEvents] = await Promise.all([
+      fetchEnhancedNFTData(userNFTs),
+      fetchEnhancedContractData(allCommunities),
+      fetchEnhancedContractData(allEvents)
+    ])
 
-      // Create comprehensive prompt for Gemini
-      const prompt = `
-You are an AI assistant that analyzes user preferences based on their NFT collection and suggests relevant communities and events.
+    const enhancedUserCommunities = enhancedAllCommunities.filter(c => userContractAddresses.has(c.address.toLowerCase()))
+    const enhancedUserEvents = enhancedAllEvents.filter(e => userContractAddresses.has(e.address.toLowerCase()))
+    const enhancedAvailableCommunities = enhancedAllCommunities.filter(c => !userContractAddresses.has(c.address.toLowerCase()))
+    const enhancedAvailableEvents = enhancedAllEvents.filter(e => !userContractAddresses.has(e.address.toLowerCase()))
 
-## User's Current NFT Collection:
+    // Simplified prompt for better JSON consistency
+    const prompt = `
+You are an AI assistant that provides NFT community recommendations. You must respond with ONLY a valid JSON array of strings.
+
+## User's NFT Collection:
 ${enhancedUserNFTs.map(nft => `
-**NFT #${nft.tokenId}** (Level ${nft.level})
-- Type: ${nft.contractType}
-- Contract: ${nft.name}
-- Description: ${nft.description}
-- NFT Metadata: ${nft.nftMetadata ? JSON.stringify(nft.nftMetadata, null, 2) : 'Not available'}
-`).join('\n')}
+- NFT #${nft.tokenId}: ${nft.name} (${nft.contractType}, Level ${nft.level})
+  Description: ${nft.description}
+  ${nft.nftMetadata?.name ? `Metadata: ${nft.nftMetadata.name}` : ''}
+`).join('')}
 
-## Available Communities:
-${enhancedCommunities.map(community => `
-**${community.name}** (${community.address})
-- Description: ${community.description}
-- Total Supply: ${community.totalSupply}
-- Levels: ${community.levels}
-- Metadata: ${community.contractMetadata ? JSON.stringify(community.contractMetadata, null, 2) : 'Not available'}
-`).join('\n')}
+## Available NEW Communities/Events (user NOT member):
+${[...enhancedAvailableCommunities, ...enhancedAvailableEvents].map((item, index) => `
+${index + 1}. ${item.name} (${item.type})
+   Description: ${item.description}
+   ${item.contractMetadata?.description ? `Details: ${item.contractMetadata.description}` : ''}
+`).join('')}
 
-## Available Events:
-${enhancedEvents.map(event => `
-**${event.name}** (${event.address})
-- Description: ${event.description}
-- Total Supply: ${event.totalSupply}
-- Levels: ${event.levels}
-- Metadata: ${event.contractMetadata ? JSON.stringify(event.contractMetadata, null, 2) : 'Not available'}
-`).join('\n')}
+## User's EXISTING Communities/Events:
+${[...enhancedUserCommunities, ...enhancedUserEvents].map((item, index) => `
+${index + 1}. ${item.name} (${item.type}) - ALREADY MEMBER
+   Description: ${item.description}
+`).join('')}
 
-Based on the user's current NFT collection, their interests, and the available communities and events, please suggest 5-7 specific communities or events that would be most relevant to them. 
+INSTRUCTIONS:
+1. Prioritize NEW communities/events from the "Available NEW" section
+2. If no good NEW matches, suggest EXISTING communities with "already a member" note
+3. Maximum 5 suggestions
+4. Use EXACT names from the lists above
 
-For each suggestion, provide:
-1. The exact name of the community/event
-2. A brief reason why it matches their interests
-3. Whether it's a community or event
+CRITICAL: Respond with ONLY a JSON array in this exact format:
+["[TYPE] Exact_Name - reason", "[TYPE] Another_Name - reason"]
 
-Format your response as a JSON array of strings, where each string contains the suggestion in this format:
-"[COMMUNITY/EVENT] Name - Reason for recommendation"
+Where TYPE is either COMMUNITY or EVENT, and use the exact names from above lists.
 
-Example format:
-["[COMMUNITY] Tech Innovators - Based on your blockchain NFTs, you'd enjoy this tech community", "[EVENT] Art Gallery Opening - Your art collection shows interest in creative events"]
+JSON Response:`
 
-Return only the JSON array, no additional text.
-`
-
-      const geminiResponse = await callGeminiAPI(prompt)
-      
-      // Parse the JSON response
-      try {
-        // Try to extract JSON from the response
-        const jsonMatch = geminiResponse.match(/\[[\s\S]*\]/)
-        if (jsonMatch) {
-          const suggestions = JSON.parse(jsonMatch[0])
-          return Array.isArray(suggestions) ? suggestions : []
-        } else {
-          // Fallback: split by lines and clean up
-          return geminiResponse
-            .split('\n')
-            .filter(line => line.trim().length > 0)
-            .slice(0, 7) // Limit to 7 suggestions
-        }
-      } catch (parseError) {
-        console.warn("Failed to parse JSON response, using fallback parsing")
-        // Fallback parsing
-        return geminiResponse
-          .split('\n')
-          .filter(line => line.trim().length > 0)
-          .slice(0, 7)
-      }
-
-    } catch (err: any) {
-      console.error("Failed to get suggestions:", err)
-      setError(err.message || "Failed to get suggestions")
-      
-      // Return fallback suggestions
-      return [
-        "[COMMUNITY] Tech Community NFT Collection - Based on your interests in blockchain technology",
-        "[EVENT] Art & Design Event Series - Your collection shows appreciation for creative works",
-        "[COMMUNITY] Gaming Tournament Community - Perfect for gamers and competitive spirits"
+    console.log("Sending prompt to Gemini:", prompt.substring(0, 500) + "...")
+    const geminiResponse = await callGeminiAPI(prompt)
+    console.log("Received Gemini response:", geminiResponse)
+    
+    // Parse the JSON response using improved extraction
+    const suggestions = extractJSONFromResponse(geminiResponse)
+    
+    if (suggestions.length > 0) {
+      // Verify suggestions reference actual available names
+      const allAvailableNames = [
+        ...enhancedAllCommunities.map(c => c.name),
+        ...enhancedAllEvents.map(e => e.name)
       ]
-    } finally {
-      setIsLoadingSuggestions(false)
+      
+      // Filter valid suggestions that reference available names
+      const validSuggestions = suggestions.filter(suggestion => {
+        const nameMatch = suggestion.match(/\[(?:COMMUNITY|EVENT)\]\s*([^-]+)/)
+        if (nameMatch) {
+          const suggestedName = nameMatch[1].trim()
+          return allAvailableNames.some(availableName => 
+            availableName.toLowerCase().includes(suggestedName.toLowerCase()) ||
+            suggestedName.toLowerCase().includes(availableName.toLowerCase()) ||
+            availableName.toLowerCase() === suggestedName.toLowerCase()
+          )
+        }
+        // Also accept suggestions that mention known community/event names
+        return allAvailableNames.some(name => 
+          suggestion.toLowerCase().includes(name.toLowerCase())
+        )
+      })
+      
+      if (validSuggestions.length > 0) {
+        return validSuggestions.slice(0, 5) // Limit to 5 suggestions
+      }
     }
+    
+    // Fallback: Create suggestions from available communities/events
+    console.log("Using fallback suggestions")
+    const fallbackSuggestions = []
+    
+    // First try new communities/events
+    const newOptions = [...enhancedAvailableCommunities, ...enhancedAvailableEvents]
+    if (newOptions.length > 0) {
+      fallbackSuggestions.push(
+        ...newOptions.slice(0, 3).map(item => 
+          `[${item.type.toUpperCase()}] ${item.name} - Matches your interests`
+        )
+      )
+    }
+    
+    // Then add existing ones if needed
+    const existingOptions = [...enhancedUserCommunities, ...enhancedUserEvents]
+    if (fallbackSuggestions.length < 3 && existingOptions.length > 0) {
+      fallbackSuggestions.push(
+        ...existingOptions.slice(0, 3 - fallbackSuggestions.length).map(item => 
+          `[${item.type.toUpperCase()}] ${item.name} - You are already a member`
+        )
+      )
+    }
+    
+    return fallbackSuggestions.slice(0, 5)
+
+  } catch (err: any) {
+    console.error("Failed to get suggestions:", err)
+    setError(err.message || "Failed to get suggestions")
+    
+    // Emergency fallback: Return user's existing communities
+    if (userNFTs.length > 0) {
+      const userContractAddresses = new Set(userNFTs.map(nft => nft.contractAddress.toLowerCase()))
+      const userCommunities = allCommunities.filter(c => userContractAddresses.has(c.address.toLowerCase()))
+      const userEvents = allEvents.filter(e => userContractAddresses.has(e.address.toLowerCase()))
+      
+      if (userCommunities.length > 0 || userEvents.length > 0) {
+        return [...userCommunities, ...userEvents]
+          .slice(0, 3)
+          .map(item => `[${item.type.toUpperCase()}] ${item.name} - You are already a member`)
+      }
+    }
+    
+    return []
+  } finally {
+    setIsLoadingSuggestions(false)
   }
+}
 
   const clearError = () => setError(null)
 

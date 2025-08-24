@@ -195,7 +195,7 @@ export function CreateContractForm() {
           <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
             <Upload className="h-4 w-4 text-primary" />
           </div>
-          <span>Deploy New Contract</span>
+          <span>Create New</span>
         </CardTitle>
         <CardDescription>
           Create a new community or event contract to start issuing NFTs
@@ -324,7 +324,7 @@ export function CreateContractForm() {
               <Alert>
                 <CheckCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Successfully deployed! Contract address: {deployedAddress}
+                  Successfully Created! Contract address: {deployedAddress}
                 </AlertDescription>
               </Alert>
             )}
@@ -347,7 +347,7 @@ export function CreateContractForm() {
                   {isUploading ? "Uploading Image..." : `Deploying ${activeTab}...`}
                 </>
               ) : (
-                <>Deploy {activeTab === "community" ? "Community" : "Event"}</>
+                <>Create {activeTab === "community" ? "Community" : "Event"}</>
               )}
             </Button>
           </TabsContent>

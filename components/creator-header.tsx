@@ -13,7 +13,7 @@ export function CreatorHeader() {
 
   const communityContracts = creatorContracts.filter((contract) => contract.type === "community")
   const eventContracts = creatorContracts.filter((contract) => contract.type === "event")
-  const totalMembers = creatorContracts.reduce((sum, contract) => sum + contract.totalSupply, 0)
+  const totalMembers = creatorContracts.reduce((sum, contract) => sum + Number(contract.totalSupply), 0)
 
   return (
     <div className="space-y-6 mb-8">
@@ -23,7 +23,7 @@ export function CreatorHeader() {
           <Palette className="h-10 w-10 text-white" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold">Creator's Corner</h1>
+          <h1 className="text-3xl font-bold">Creator&apos;s Corner</h1>
           <p className="text-muted-foreground">{account && formatAddress(account)}</p>
         </div>
       </div>
