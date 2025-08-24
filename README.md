@@ -88,6 +88,7 @@ or
 yarn install
 ```
 
+4. .env: Copy .env.example to .env and enter the variables
 
 ### Running the App
 

@@ -136,33 +136,105 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
 
   const clearError = () => setError(null)
 
-  const connectWallet = async () => {
-    if (typeof window !== "undefined" && window.ethereum) {
-      try {
-        setIsConnecting(true)
-        setError(null)
-
-        const provider = new ethers.BrowserProvider(window.ethereum)
-        const accounts = await provider.send("eth_requestAccounts", [])
-        const signer = await provider.getSigner()
-
-        setProvider(provider)
-        setSigner(signer)
-        setAccount(accounts[0])
-        setIsConnected(true)
-
-        // Store connection in localStorage
-        localStorage.setItem("walletConnected", "true")
-      } catch (error: any) {
-        console.error("Failed to connect wallet:", error)
-        setError(error.message || "Failed to connect wallet")
-      } finally {
-        setIsConnecting(false)
-      }
-    } else {
-      setError("Please install MetaMask or another Web3 wallet")
-    }
+const connectWallet = async () => {
+  // Check if we're in a browser environment with Web3 wallet
+  if (typeof window === "undefined" || !window.ethereum) {
+    setError("Please install MetaMask or another Web3 wallet to continue.");
+    return;
   }
+
+  try {
+    setIsConnecting(true);
+    setError(null);
+
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    
+    // Shape Testnet configuration
+    const shapeTestnetConfig = {
+      chainId: '0x2b03', // 11011 in hex (Shape Sepolia Testnet)
+      chainName: 'Shape Sepolia Testnet',
+      nativeCurrency: {
+        name: 'Ethereum',
+        symbol: 'ETH',
+        decimals: 18,
+      },
+      rpcUrls: ['https://sepolia-rpc.shape.network'],
+      blockExplorerUrls: ['https://sepolia-explorer.shape.network'],
+    };
+
+    // Handle network switching/adding
+    try {
+      // First try to switch to Shape Testnet (in case it already exists)
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: shapeTestnetConfig.chainId }],
+      });
+    } catch (switchError: any) {
+      // If the chain doesn't exist, try to add it
+      if (switchError.code === 4902) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [shapeTestnetConfig],
+          });
+        } catch (addError: any) {
+          if (addError.code === 4001) {
+            setError("Network addition was cancelled. To use Shape Testnet, please add it manually in your wallet settings.");
+            return;
+          }
+          console.error("Failed to add Shape Testnet:", addError);
+          setError("Failed to add Shape Testnet. Please add it manually in your wallet settings.");
+          return;
+        }
+      } else if (switchError.code === 4001) {
+        setError("Network switch was cancelled. Please switch to Shape Testnet manually in your wallet settings.");
+        return;
+      } else {
+        console.error("Failed to switch to Shape Testnet:", switchError);
+        setError("Failed to connect to Shape Testnet. Please check your wallet and try again.");
+        return;
+      }
+    }
+
+    // Request account access
+    let accounts;
+    try {
+      accounts = await provider.send("eth_requestAccounts", []);
+    } catch (accountError: any) {
+      if (accountError.code === 4001) {
+        setError("Account access was cancelled. Please approve the connection request in your wallet.");
+        return;
+      }
+      console.error("Failed to request account access:", accountError);
+      setError("Failed to access wallet accounts. Please check your wallet permissions.");
+      return;
+    }
+
+    // Validate accounts
+    if (!accounts || accounts.length === 0) {
+      setError("No accounts found. Please check your wallet connection.");
+      return;
+    }
+
+    // Get signer and update state
+    const signer = await provider.getSigner();
+    setProvider(provider);
+    setSigner(signer);
+    setAccount(accounts[0]);
+    setIsConnected(true);
+
+    // Store connection state
+    localStorage.setItem("walletConnected", "true");
+    
+    console.log(`Successfully connected to Shape Testnet with account: ${accounts[0]}`);
+
+  } catch (error: any) {
+    console.error("Wallet connection failed:", error);
+    setError(error.message || "An unexpected error occurred while connecting to your wallet.");
+  } finally {
+    setIsConnecting(false);
+  }
+};
 
   const disconnectWallet = () => {
     setAccount(null)
