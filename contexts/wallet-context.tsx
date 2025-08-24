@@ -99,10 +99,6 @@ interface WalletContextType {
   presenceEventFactoryAddress: string
   presenceCommunityFactoryAddress: string
 
-  // AI features (placeholders)
-  generateImage: (prompt: string) => Promise<string>
-  getSuggestions: (userNFTs: NFT[]) => Promise<string[]>
-
   // Error handling
   error: string | null
   clearError: () => void
@@ -428,7 +424,6 @@ const loadCreatorContracts = useCallback(async () => {
             const totalSupply = await contract.totalSupply()
             const levels = await contract.levelCount();
 
-
             contracts.push({
               address: contractAddress,
               type: "community",
@@ -686,19 +681,6 @@ const loadCreatorContracts = useCallback(async () => {
     }
   }
 
-  // AI placeholder functions
-  const generateImage = async (prompt: string): Promise<string> => {
-    // TODO: Replace with actual AI image generation API
-    console.log("Generating image for prompt:", prompt)
-    return "/placeholder.svg?height=400&width=400&query=" + encodeURIComponent(prompt)
-  }
-
-  const getSuggestions = async (userNFTs: NFT[]): Promise<string[]> => {
-    // TODO: Replace with actual Gemini API call
-    console.log("Getting suggestions based on NFTs:", userNFTs)
-    return ["Tech Community NFT Collection", "Art & Design Event Series", "Gaming Tournament Badge"]
-  }
-
   // Listen for account changes
   useEffect(() => {
     if (typeof window !== "undefined" && window.ethereum) {
@@ -787,8 +769,6 @@ useEffect(() => {
     removeFromAllowlist,
     presenceEventFactoryAddress,
     presenceCommunityFactoryAddress,
-    generateImage,
-    getSuggestions,
     error,
     clearError,
     getContractDetails,

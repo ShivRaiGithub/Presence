@@ -20,7 +20,7 @@ export function Navbar() {
         <div className="flex justify-between items-center h-16">
           
           {/* Logo */}
-         <Link href="/" className="flex items-center space-x-2">
+         <Link href="/" suppressHydrationWarning={true} className="flex items-center space-x-2">
       {/* Gradient circle from SVG, scaled 1.5x */}
       <div className="w-12 h-12 rounded-lg flex items-center justify-center overflow-hidden">
         <svg
@@ -52,13 +52,13 @@ export function Navbar() {
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="text-foreground/80 hover:text-foreground transition-colors">
+            <Link href="/" suppressHydrationWarning className="text-foreground/80 hover:text-foreground transition-colors">
               Home
             </Link>
-            <Link href="/profile" className="text-foreground/80 hover:text-foreground transition-colors">
+            <Link href="/profile"  suppressHydrationWarning={true} className="text-foreground/80 hover:text-foreground transition-colors">
               Profile
             </Link>
-            <Link href="/creator" className="text-foreground/80 hover:text-foreground transition-colors">
+            <Link href="/creator"  suppressHydrationWarning={true}  className="text-foreground/80 hover:text-foreground transition-colors">
               Creator&apos;s Corner
             </Link>
             {/* <Link href="/about" className="text-foreground/80 hover:text-foreground transition-colors">

@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
         hostname: "gateway.ipfs.io",
         pathname: "/ipfs/**",
       },
+      {
+        protocol: "https",
+        hostname: "image.pollinations.ai",
+        pathname: "/**",
+      },
     ],
   },
 };

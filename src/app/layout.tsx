@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { WalletProvider } from "@/contexts/wallet-context";
+import { AIProvider } from "@/contexts/ai-context";
 
 export const metadata: Metadata = {
   title: "Presence - Proof of Presence Platform",
@@ -38,7 +39,11 @@ html {
       </head>
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <WalletProvider>{children}</WalletProvider>
+          <WalletProvider>
+            <AIProvider>
+              {children}
+            </AIProvider>
+          </WalletProvider>
         </ThemeProvider>
       </body>
     </html>
