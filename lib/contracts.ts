@@ -50,10 +50,9 @@ export const NETWORK_CONFIG = {
   */
 }
 
-// Contract addresses - update these after deployment
 export const CONTRACT_ADDRESSES = {
-  presenceEventFactory: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-  presenceCommunityFactory: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+  presenceEventFactory: "0x00CB402321a902CbA782f591ACb557c1d121669f",
+  presenceCommunityFactory: "0x464Cbc87D461B53Adb626184C3BDCfa605c8eB26",
 }
 
 // Helper function to validate Ethereum addresses

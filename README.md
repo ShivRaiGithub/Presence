@@ -1,36 +1,117 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Presence - Proof-of-Presence Platform
+
+## The Story
+
+Shape really focuses on artists and creators. And I want to build something that would help Shape help artists and creators more. Something useful. Not just a fun little project. So I got this Proof-of-Presence idea. Proving that you are present in a community of a creator. A Badge of that. In form of an NFT. What if creators could provide metadata of NFT and image along with the wallets allowed to mint that NFT. Wouldn't it be like the creator invited you to join their community ? Wouldn't it feel personal and close ?
+   
+Creators would get gasback because community members would be interacting with creators' deployed contracts, and the community members would be getting NFTs that prove their presence in a community. These NFTs can be used as a certificate to prove skills and participation in events or a badge and membership proof of a community.
+   
+Creators should spend time doing what suits them the best and let the platform handle the complexities.
+
+## The platform
+
+Presence is a decentralized platform that helps creators grow their communities and events by providing Proof-Of-Presence NFTs. This platform streamlines membership NFTs management and gives creators more time to create.
+   
+Creators issue NFTs to grow their communities. Members mint NFTs to prove their presence.
+
+## Table of Contents
+
+- [Project Overview](#project-overview)
+- [Features](#features)
+- [Usage](#usage)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Running the App](#running-the-app)
+- [Smart Contracts](#smart-contracts)
+
+## Project Overview
+
+Presence leverages blockchain technology to allow users to:
+
+- Create communities 
+- Create events
+- Mint variety of NFTs for these communities and events
+
+The platform ensures transparency, security, and immutability for community and events.
+
+## Usage
+1) Landing Page: User is able to connect wallet
+2) Profile Page: User is able to see his NFTs and get AI suggestions for more communities and events
+3) Creator's Corner: Creator is able to create a new community or event, generate image using AI through text prompt, and see created communities and events and manage them.
+4) Contract Management: Creator is able to add more levels with metadataURI for NFTs, add or remove users from mint list, see overview of NFTs and generate mint links for NFTs.
+5) Mint page: Eligible Users are able to mint NFTs through link provided by the creator. This page contains details of both, the NFT to be minted and the contract.
+
+## Features
+
+- **Community Management**: Create and manage communities
+- **Event Management**: Create and track events
+- **Proof-of-Presence**: Validate and record presence on-chain
+- **Dashboard**: Track participation and engagement
+
+## Tech Stack
+
+- **Frontend**:Next.js, Tailwind CSS
+- **Blockchain**: Shape
+- **Smart Contracts**: Solidity, Foundry
+- **Contract connection**: Ethersjs
+- **Storage**: IPFS for metadata and media files
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js
+- npm or yarn
+- MetaMask wallet
+- Foundry
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/ShivRaiGithub/Presence.git
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Navigate to project folder:
+```bash
+cd Presence
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Install dependencies:
+```bash
+npm install --legacy-peer-deps
+```
+or
+```bash
+yarn install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Learn More
+### Running the App
 
-To learn more about Next.js, take a look at the following resources:
+1. Start the development server:
+```bash
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. Open [http://localhost:3000](http://localhost:3000) with your browser to see the DApp
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+** NOTE **
+If deploying smart contracts locally, change the following in lib/contracts.ts (Right now they point to the deployed contracts on shape testnet):
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```javascript
+export const CONTRACT_ADDRESSES = {
+  presenceEventFactory: "0x00CB402321a902CbA782f591ACb557c1d121669f",
+  presenceCommunityFactory: "0x464Cbc87D461B53Adb626184C3BDCfa605c8eB26",
+}
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Smart Contracts
+
+- **PresenceCommunityFactory**: Deploys new community contracts
+- **PresenceEventFactory**: Deploys new event contracts
+- **Community Contract**: Manages members, metadata, NFTs and Community
+- **Event Contract**: Manages members, metadata, NFTs and Event
