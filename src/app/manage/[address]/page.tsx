@@ -59,7 +59,7 @@ export default function ManagePage() {
         <div className="mb-6">
           <Button onClick={() => router.push("/creator")} variant="ghost" className="ripple-effect">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Creator's Corner
+            Back to Creator&apos;s Corner
           </Button>
         </div>
 
