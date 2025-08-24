@@ -575,12 +575,12 @@ const loadCreatorContracts = useCallback(async () => {
 
       // Find the CommunityDeployed event to get the new contract address
       const event = receipt.logs.find((log: any) => 
-        log.topics[0] === factory.interface.getEvent("CommunityDeployed").topicHash
+        log.topics[0] === factory.interface.getEvent("CommunityDeployed")!.topicHash
       )
 
       if (event) {
         const parsedEvent = factory.interface.parseLog(event)
-        return parsedEvent.args.contractAddress
+        return parsedEvent!.args.contractAddress
       }
 
       throw new Error("Failed to get deployed contract address")
@@ -607,12 +607,12 @@ const loadCreatorContracts = useCallback(async () => {
 
       // Find the EventDeployed event to get the new contract address
       const event = receipt.logs.find((log: any) => 
-        log.topics[0] === factory.interface.getEvent("EventDeployed").topicHash
+        log.topics[0] === factory.interface.getEvent("EventDeployed")!.topicHash
       )
 
       if (event) {
         const parsedEvent = factory.interface.parseLog(event)
-        return parsedEvent.args.contractAddress
+        return parsedEvent!.args.contractAddress
       }
 
       throw new Error("Failed to get deployed contract address")

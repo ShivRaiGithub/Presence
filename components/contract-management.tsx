@@ -144,7 +144,6 @@ const handleAddToAllowlist = async () => {
       })
     
     if (addresses.length === 0) {
-      setError("No valid addresses found. Please ensure addresses are in the format 0x...")
       return
     }
     
