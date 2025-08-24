@@ -127,7 +127,7 @@ export const CONTRACT_ADDRESSES = {
 
 ## Next Steps
 1. Integration with Google forms: Allows Creators to share a google form with users which collects wallet addresses of users allowing creators to directly extract and allow all wallet addresses to mint NFTs.
-2. Improving AI Image model: Improving the AI iamge generation feature (Integrate APIs of better models or use a self-hosted model).
+2. Improving AI Image model: Improving the AI image generation feature (Integrate APIs of better models or use a self-hosted model).
 3. Improving Community and Event contract: Gas Optimizations, better features like options for "Anyone can join" or "Invite only" for community and events and Start and End Dates for events.
 4. Dynamic NFTs: Allow users to update their NFTs' Metadata based on their achievements in community or event.
 5. Improving UI/UX: Creators shouldn't worry about things they don't need to worry about.
