@@ -8,6 +8,13 @@ Creators would get gasback because community members would be interacting with c
    
 Creators should spend time doing what suits them the best and let the platform handle the complexities.
 
+## Hackathon
+Video demo: https://youtu.be/TeyJThHBiNU   
+Team members: Shiv Shakti Rai   
+Contracts Deployed on Shape Testnet:   
+  presenceEventFactory: "0x00CB402321a902CbA782f591ACb557c1d121669f",   
+  presenceCommunityFactory: "0x464Cbc87D461B53Adb626184C3BDCfa605c8eB26"   
+
 ## The platform
 
 Presence is a decentralized platform that helps creators grow their communities and events by providing Proof-Of-Presence NFTs. This platform streamlines membership NFTs management and gives creators more time to create.
